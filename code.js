@@ -12,10 +12,9 @@ function onOpen() {
 
 function showSidebar() {
   const ver = "(ver:1)";
-  const html = HtmlService.createHtmlOutputFromFile('sidebar.html')
-      .setTitle('GPTスライド'  + ver)
-      .setWidth(300);
-  SlidesApp.getUi().showSidebar(html);
+  const html = HtmlService.createTemplateFromFile('sidebar.html')
+  html.openai_model = OPENAI_MODEL;
+  SlidesApp.getUi().showSidebar(html.evaluate().setTitle('GPTスライド'  + ver).setWidth(300));
 }
 
 /**
