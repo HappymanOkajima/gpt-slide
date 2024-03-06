@@ -2,6 +2,7 @@ const OPENAI_API_KEY = PropertiesService.getScriptProperties().getProperty("OPEN
 const OPENAI_MODEL = PropertiesService.getScriptProperties().getProperty("OPENAI_MODEL") || "gpt-3.5-turbo-16k";
 const IMAGE_TEMPERATURE = PropertiesService.getScriptProperties().getProperty("IMAGE_TEMPERATURE") || "0.5";
 const IMAGE_MAX_WORDS = PropertiesService.getScriptProperties().getProperty("IMAGE_MAX_WORDS") || "40";
+const IMAGE_PROMPT_GEN_MODEL = PropertiesService.getScriptProperties().getProperty("IMAGE_PROMPT_GEN_MODEL") || "gpt-3.5-turbo-16k";
 const SHEET_ID = PropertiesService.getScriptProperties().getProperty("SHEET_ID");
 
 function onOpen() {
@@ -344,7 +345,7 @@ function getImagePrompt_(targetText) {
   }
 
   const data = {
-    model: OPENAI_MODEL,
+    model: IMAGE_PROMPT_GEN_MODEL,
     messages: [
       {
         role: "system",
