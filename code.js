@@ -193,19 +193,6 @@ function getTextResponse_(prompt, creativity) {
   log_("【RES_3】" + content);
   return content;
 }
-function insertTextToActiveSlide_(text) {
-  // Google スライドのアクティブなプレゼンテーションとスライドを取得
-  const presentation = SlidesApp.getActivePresentation();
-  const slide = presentation.getSelection().getCurrentPage();
-
-  const bodyShape = slide.getShapes()[1];
-  const shape = bodyShape.duplicate().setLeft(200).setWidth(500).asShape();
-
-  // パラグラフとしてコードの行を追加し、等幅フォントと調整された間隔で表示
-  const textBox = shape.getText();
-  textBox.clear();
-  textBox.appendParagraph(text);
-}
 
 function getAllTextFromActiveSlide_() {
   // Google スライドのアクティブなプレゼンテーションとスライドを取得
