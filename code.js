@@ -220,7 +220,10 @@ function getSlidesResponse_(prompt, numPages, creativity) {
       { role: "user", content: prompt }
     ],
     // max_tokens: 3000,
-    temperature: temperature
+    temperature: temperature,
+    response_format: {
+      type: "json_object"
+    }
   };
 
   const options = {
