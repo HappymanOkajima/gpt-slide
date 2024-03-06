@@ -18,6 +18,21 @@ function showSidebar() {
   SlidesApp.getUi().showSidebar(html);
 }
 
+/**
+ * 現在のプレゼンテーションにスライドを作成します。
+ * 
+ * @param {string} inputText - スライド作成のための指示
+ * @param {number} numPages - 作成するスライドの数
+ * @param {string} creativity - スライド作成の創造性レベル
+ * 
+ * この関数は、GPTから取得したレスポンスを使用してスライドを作成します。
+ * まず、GPTレスポンスからスライドデータを取得し、アクティブなプレゼンテーションを取得します。
+ * 次に、タイトルスライドを作成し、タイトルテキストを設定します。
+ * 最後に、各スライドデータオブジェクトをループしてスライドを作成します。
+ * スライドデータに"code"フィールドがある場合、コードブロックを追加します。
+ * スライドデータに"points"フィールドがある場合、箇条書きを追加します。
+ * すべてのスライドが作成された後、それらを適切な位置に移動します。
+ */
 function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
   // GPTレスポンスからJSONデータを取得
   const json = getSlidesResponse_(inputText, numPages, creativity);
@@ -71,6 +86,14 @@ function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
   }
 }
 
+/**
+ * 現在のスライドに画像を生成します。
+ * 
+ * @param {string} imageCaption - 生成する画像のキャプション(スタイル)
+ * 
+ * この関数は、アクティブなスライドから全てのテキストを取得し、画像生成のためのプロンプトを作成します。
+ * 次に、Dall-Eから画像を生成し、その画像をアクティブなスライドに挿入します。
+ */
 function generateImageInCurrentSlide(imageCaption) {
   const allText = getAllTextFromActiveSlide_();
   const prompt = getImagePrompt_(allText);
@@ -80,6 +103,18 @@ function generateImageInCurrentSlide(imageCaption) {
 
 }
 
+/**
+ * 現在選択されている要素にテキストを生成します。
+ * 
+ * @param {string} deepDive - 指示（深掘りするためのプロンプト）
+ * @param {string} creativity - テキスト生成の創造性レベル
+ * 
+ * この関数は、アクティブなプレゼンテーションから選択された要素を取得し、それがテキストを含むShapeまたはテーブルである場合、
+ * そのテキストを取得し、新しいテキストを生成して置き換えます。
+ * テキストShapeの場合、そのテキストを取得し、新しいテキストを生成して置き換えます。
+ * テーブルの場合、各セルのテキストを取得し、新しいテキストを生成して置き換えます。
+ * 選択された要素がテキストを含む形状またはテーブルでない場合、エラーをスローします。
+ */
 function generateTextInCurrentElement(deepDive, creativity) {
   const selection = SlidesApp.getActivePresentation().getSelection();
   if (!selection || !selection.getPageElementRange()) {
@@ -191,8 +226,22 @@ function getAllTextFromActiveSlide_() {
   }
 
   return allText;
-}
 
+}/**
+ * OpenAI APIを使用してスライドのレスポンスを取得します。
+ * 
+ * @param {string} prompt - スライド生成のためのプロンプト
+ * @param {number} numPages - 生成するスライドの数
+ * @param {string} creativity - スライド生成の創造性レベル
+ * @returns {Object} スライドデータを含むJSONオブジェクト
+ * 
+ * この関数は、OpenAI APIを使用してスライドのレスポンスを取得します。
+ * システムメッセージは、スライドのアウトラインを作成する指示とテンプレートJSONを含みます。
+ * ユーザーメッセージは、プロンプトを含みます。
+ * レスポンスフォーマットは、タイプを"json_object"に指定していますが、
+ * 念のため、JSONコードブロックを削除する従来の処理も行っています。
+ * パースに失敗した場合、エラーをログに記録し、エラーをスローします。
+ */
 function getSlidesResponse_(prompt, numPages, creativity) {
   let temperature = 0.5;
   if (creativity === "low") {
@@ -256,6 +305,16 @@ function removeJsonCodeBlock_(inputString) {
   return outputString;
 }
 
+/**
+ * スライドにコードブロックのテキストを挿入します。
+ * 
+ * @param {string} codeblock - 挿入するコードブロック
+ * @param {Object} slide - コードブロックを挿入するスライド
+ * 
+ * スライドにコードブロックのテキストを新しいテキストShapeとして挿入します。
+ * コードとしての見栄えを良くするために、フォントサイズやファミリなどを独自に設定しています。
+ * 
+ */
 function insertCodeBlockText_(codeblock,slide) {
   // 連続する複数の改行を1つの改行に置き換え
   const code = codeblock.replace(/(\n)+/g, '\n');
@@ -280,6 +339,15 @@ function insertCodeBlockText_(codeblock,slide) {
   }
 }
 
+/**
+ * OpenAI APIを使用して画像生成のためのプロンプトを取得します。
+ * 
+ * @param {string} targetText - 画像生成のためのターゲットテキスト
+ * @returns {string} 画像生成AIのためのプロンプト
+ * 
+ * この関数は、OpenAI APIを使用して画像生成（DALL-E）のためのプロンプトを取得します。
+ * 
+ */
 function getImagePrompt_(targetText) {
   const url = "https://api.openai.com/v1/chat/completions";
 
@@ -324,7 +392,6 @@ function getImagePrompt_(targetText) {
 }
 
 /**
- * generateImageFromDallE_
  * OpenAIのDALL·E APIを利用して、テキストプロンプトから画像を生成します。
  *
  * @param {string} prompt - 画像生成の主要なプロンプト。
