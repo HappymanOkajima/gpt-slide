@@ -44,7 +44,7 @@ input[type=text] {
 }
 
 select {
-  width: 30%;
+  width: 50%;
   margin-bottom: 5px;
   font-size: 12px;
   padding: 5px;
@@ -88,7 +88,7 @@ select {
       cols="40"
       placeholder="トピックは、AI時代のエンジニアに求められる働き方です。各項目50文字以内で書いてほしい。最初のスライドは目次にしてください。"
     ></textarea>
-    <p>必要ページ数：<input type="number" id="numPages" value="3" placeholder="ページ数"></p>
+    <p>スライド数：<input type="number" id="numPages" value="3" placeholder="ページ数"></p>
     <p>
       AIの創造性：
       <select id="creativity">
@@ -97,6 +97,15 @@ select {
         <option value="high">高め</option>
       </select>
     </p>
+    <p>
+      画像生成：
+      <select id="imageGeneration">
+        <option value="none" selected>なし</option>
+        <option value="title">タイトルスライドのみ</option>
+        <option value="all">各スライド</option>
+      </select>
+    </p>
+
     <button onclick="createSlides()">作成する </button>
     <hr />
     <h3>2. 表示中のスライドから画像を作成</h3>
@@ -125,11 +134,11 @@ select {
 
     <button onclick="generateImage()">作成する</button>
     <hr />
-    <h3>3. アクティブなオブジェクトのテキストから文章を作成</h3>
+    <h3>3. アクティブテキストから文章を作成</h3>
     <p>
     <textarea
       id="deepDive"
-      rows="3"
+      rows="2"
       cols="40"
       placeholder="要約してください。"
     ></textarea>
@@ -138,7 +147,7 @@ select {
 
     <p id="waitingMessage">お待ちください...処理中です。</p>
     <div id="fixedMessage">
-      画像生成にはDALL-E 3を利用しています。
+      文章生成には <?= openai_model ?> 、画像生成にはDALL-E 3を利用しています。
     </div>
 <script>
   // ボタンを無効化する関数
@@ -161,6 +170,8 @@ select {
     var inputText = document.getElementById('chatGptInput').value;
     var numPages = document.getElementById('numPages').value;
     var creativity = document.getElementById('creativity').value;
+    var imageGeneration = document.getElementById('imageGeneration').value;
+    var imageCaption = document.getElementById('imageCaption').value;
 
     disableButtons(); // ボタンを無効にする
 
@@ -175,7 +186,7 @@ select {
         alert('再度実行してください：' + e);
         document.getElementById('waitingMessage').style.display = 'none';
       })
-      .createSlidesInCurrentPresentation(inputText, numPages, creativity);
+      .createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption);
   }
 
   function generateImage() {

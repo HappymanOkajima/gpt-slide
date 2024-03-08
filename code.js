@@ -24,6 +24,7 @@ function showSidebar() {
  * @param {string} inputText - スライド作成のための指示
  * @param {number} numPages - 作成するスライドの数
  * @param {string} creativity - スライド作成の創造性レベル
+ * @param {string} imageGeneration - 画像生成モード（none | title | all)
  * 
  * この関数は、GPTから取得したレスポンスを使用してスライドを作成します。
  * まず、GPTレスポンスからスライドデータを取得し、アクティブなプレゼンテーションを取得します。
@@ -33,7 +34,7 @@ function showSidebar() {
  * スライドデータに"points"フィールドがある場合、箇条書きを追加します。
  * すべてのスライドが作成された後、それらを適切な位置に移動します。
  */
-function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
+function createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption) {
   // GPTレスポンスからJSONデータを取得
   const json = getSlidesResponse_(inputText, numPages, creativity);
 
@@ -48,6 +49,9 @@ function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
   // タイトルスライドを作成し、タイトルテキストを設定
   const titleSlide = currentPresentation.appendSlide(SlidesApp.PredefinedLayout.TITLE);
   addedSlides.push(titleSlide);
+  if (imageGeneration === "title") {
+    generateImageInSlide_(titleSlide, imageCaption);
+  }
 
   titleSlide.getShapes()[0].getText().setText(json.title);
 
@@ -79,6 +83,9 @@ function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
         }
       }
     }
+    if (imageGeneration === "all") {
+      generateImageInSlide_(slide, imageCaption);
+    }
   });
   for (let i = addedSlides.length - 1;i >= 0;i--) {
     const slide = addedSlides[i];
@@ -95,12 +102,19 @@ function createSlidesInCurrentPresentation(inputText, numPages, creativity) {
  * 次に、Dall-Eから画像を生成し、その画像をアクティブなスライドに挿入します。
  */
 function generateImageInCurrentSlide(imageCaption) {
-  const allText = getAllTextFromActiveSlide_();
+  // Google スライドのアクティブなプレゼンテーションとスライドを取得
+  const presentation = SlidesApp.getActivePresentation();
+  const slide = presentation.getSelection().getCurrentPage();
+
+  generateImageInSlide_(slide, imageCaption);
+}
+
+function generateImageInSlide_(slide, imageCaption) {
+  const allText = getAllTextFromSlide_(slide);
   const prompt = getImagePrompt_(allText);
 
   const blob = generateImageFromDallE_(prompt, imageCaption);
-  insertImageBlobToActiveSlide_(blob)
-
+  insertImageBlobToSlide_(slide, blob)
 }
 
 /**
@@ -194,11 +208,7 @@ function getTextResponse_(prompt, creativity) {
   return content;
 }
 
-function getAllTextFromActiveSlide_() {
-  // Google スライドのアクティブなプレゼンテーションとスライドを取得
-  const presentation = SlidesApp.getActivePresentation();
-  const slide = presentation.getSelection().getCurrentPage();
-
+function getAllTextFromSlide_(slide) {
   // スライド内のすべてのページ要素を取得
   const pageElements = slide.getPageElements();
   let allText = '';
@@ -213,8 +223,8 @@ function getAllTextFromActiveSlide_() {
   }
 
   return allText;
-
-}/**
+}
+/**
  * OpenAI APIを使用してスライドのレスポンスを取得します。
  * 
  * @param {string} prompt - スライド生成のためのプロンプト
@@ -422,12 +432,9 @@ function generateImageFromDallE_(prompt, imageCaption) {
   return UrlFetchApp.fetch(imageUrl).getBlob();
 }
 
-function insertImageBlobToActiveSlide_(blob) {
-  // Google スライドのアクティブなプレゼンテーションとスライドを取得
-  const presentation = SlidesApp.getActivePresentation();
-  const slide = presentation.getSelection().getCurrentPage();
+function insertImageBlobToSlide_(slide, blob) {
   // 画像を挿入
-  slide.insertImage(blob).setLeft(200).setTop(10);
+  slide.insertImage(blob,400,90,300,300).sendToBack();
 }
 
 function log_(message) {
