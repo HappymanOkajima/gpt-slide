@@ -12,7 +12,7 @@ function onOpen() {
 }
 
 function showSidebar() {
-  const ver = "(ver:1)";
+  const ver = "(ver:1.1)";
   const html = HtmlService.createTemplateFromFile('sidebar.html')
   html.openai_model = OPENAI_MODEL;
   SlidesApp.getUi().showSidebar(html.evaluate().setTitle('GPTスライド'  + ver).setWidth(300));
@@ -420,7 +420,7 @@ function generateImageFromDallE_(prompt, imageCaption) {
       model: model,
       prompt: prompt + " " + imageCaption,
       size: size,
-      quality: "hd",
+      quality: "standard",
       response_format: responseFormat
     })
   };
