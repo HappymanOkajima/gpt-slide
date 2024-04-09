@@ -35,7 +35,6 @@ input[type=number] {
 }
 
 input[type=text] {
-  width: 90%;
   margin-bottom: 5px;
   font-size: 12px;
   padding: 5px;
@@ -44,7 +43,6 @@ input[type=text] {
 }
 
 select {
-  width: 50%;
   margin-bottom: 5px;
   font-size: 12px;
   padding: 5px;
@@ -104,6 +102,10 @@ select {
         <option value="title">タイトルスライドのみ</option>
         <option value="all">各スライド</option>
       </select>
+    </p>
+    <p>
+      付加情報：
+      <input type="text" id="profileDocUrl" placeholder="GoogleドキュメントのURL">
     </p>
 
     <button onclick="createSlides()">作成する </button>
@@ -172,6 +174,7 @@ select {
     var creativity = document.getElementById('creativity').value;
     var imageGeneration = document.getElementById('imageGeneration').value;
     var imageCaption = document.getElementById('imageCaption').value;
+    var profileDocUrl = document.getElementById('profileDocUrl').value;
 
     disableButtons(); // ボタンを無効にする
 
@@ -186,7 +189,7 @@ select {
         alert('再度実行してください：' + e);
         document.getElementById('waitingMessage').style.display = 'none';
       })
-      .createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption);
+      .createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption, profileDocUrl);
   }
 
   function generateImage() {

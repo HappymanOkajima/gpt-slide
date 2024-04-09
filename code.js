@@ -12,7 +12,7 @@ function onOpen() {
 }
 
 function showSidebar() {
-  const ver = "(ver:1.1)";
+  const ver = "(ver:2)";
   const html = HtmlService.createTemplateFromFile('sidebar.html')
   html.openai_model = OPENAI_MODEL;
   SlidesApp.getUi().showSidebar(html.evaluate().setTitle('GPTスライド'  + ver).setWidth(300));
@@ -25,18 +25,27 @@ function showSidebar() {
  * @param {number} numPages - 作成するスライドの数
  * @param {string} creativity - スライド作成の創造性レベル
  * @param {string} imageGeneration - 画像生成モード（none | title | all)
+ * @param {string} imageCaption - 生成する画像のキャプション(スタイル)
+ * @param {string} profileDocUrl - プロフィール（付加情報）のGoogleドキュメントのURL
  * 
  * この関数は、GPTから取得したレスポンスを使用してスライドを作成します。
- * まず、GPTレスポンスからスライドデータを取得し、アクティブなプレゼンテーションを取得します。
- * 次に、タイトルスライドを作成し、タイトルテキストを設定します。
- * 最後に、各スライドデータオブジェクトをループしてスライドを作成します。
+ * 有効なGoogleドキュメントのURLが指定されている場合、プロンプトにはドキュメントの内容が付加されます。
  * スライドデータに"code"フィールドがある場合、コードブロックを追加します。
  * スライドデータに"points"フィールドがある場合、箇条書きを追加します。
  * すべてのスライドが作成された後、それらを適切な位置に移動します。
  */
-function createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption) {
+function createSlidesInCurrentPresentation(inputText, numPages, creativity, imageGeneration, imageCaption, profileDocUrl) {  
+  let prompt = inputText;
+  if (profileDocUrl) {
+    try {
+      doc = DocumentApp.openByUrl(profileDocUrl);
+      prompt += `---------------------\nこのスライドの付加情報は以下の通りです。\n---------------------\n\n${doc.getText()}`;
+    } catch {
+      console.log(`${profileDocUrl}は無効なURLです。`);
+    }
+  }
   // GPTレスポンスからJSONデータを取得
-  const json = getSlidesResponse_(inputText, numPages, creativity);
+  const json = getSlidesResponse_(prompt, numPages, creativity);
 
   // アクティブなプレゼンテーションとスライドデータを取得
   const currentPresentation = SlidesApp.getActivePresentation();

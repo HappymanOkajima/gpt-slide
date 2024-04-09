@@ -13,4 +13,3 @@ function test_generateImageInCurrentSlide() {
 function test_generateTextInCurrentShape() {
   generateTextInCurrentElement("50文字に要約して");
 }
-
