@@ -4,7 +4,7 @@
     <base target="_top">
     <style>
 body {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.2;
   padding: 15px;
   margin: 0;
@@ -13,13 +13,13 @@ body {
 }
 
 p {
-  margin: 0 0 5px;
+  margin: 0 0 3px;
 }
 
 textarea {
   width: 90%;
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: 11px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -28,7 +28,7 @@ textarea {
 input[type=number] {
   width: 20%;
   margin-bottom: 5px;
-  font-size: 12px;
+  font-size: 11px;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -36,7 +36,7 @@ input[type=number] {
 
 input[type=text] {
   margin-bottom: 5px;
-  font-size: 12px;
+  font-size: 11px;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -44,7 +44,7 @@ input[type=text] {
 
 select {
   margin-bottom: 5px;
-  font-size: 12px;
+  font-size: 11px;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -70,19 +70,19 @@ select {
   background-color: rgba(240, 240, 240, 0.8);
   border: 1px solid #f0c36d;
   border-radius: 10px;
-  padding: 20px;
+  padding: 5px;
   color: #856404;
   text-align: left;
-  font-size: 13px;
+  font-size: 10px;
 }
 </style>
   </head>
 <body>
-    <h3>1. スライドを自動で作成</h3>
+    <h4>スライドを自動作成</h4>
     <p>どんなトピックをどんな風に：</p>
     <textarea
       id="chatGptInput"
-      rows="4"
+      rows="3"
       cols="40"
       placeholder="トピックは、AI時代のエンジニアに求められる働き方です。各項目50文字以内で書いてほしい。最初のスライドは目次にしてください。"
     ></textarea>
@@ -110,7 +110,13 @@ select {
 
     <button onclick="createSlides()">作成する </button>
     <hr />
-    <h3>2. 表示中のスライドから画像を作成</h3>
+    <h4>マークダウンからスライド作成</h4>
+    <textarea id="markdownInput" rows="2" cols="40" placeholder="ここにマークダウンを入力"></textarea>
+    <br>
+    <button onclick="generateMarkdownSlides()">生成する</button>    
+
+    <hr />
+    <h4>表示中のスライドから画像作成</h4>
     <p>
     <label for="editable-select">画像のスタイル：</label>
     <input type="text" id="imageCaption" name="style" list="styles">
@@ -136,7 +142,7 @@ select {
 
     <button onclick="generateImage()">作成する</button>
     <hr />
-    <h3>3. アクティブテキストから文章を作成</h3>
+    <h4>アクティブテキストから文章作成</h4>
     <p>
     <textarea
       id="deepDive"
@@ -147,9 +153,10 @@ select {
     </p>
      <button onclick="generateText()">作成する</button>
 
+
     <p id="waitingMessage">お待ちください...処理中です。</p>
     <div id="fixedMessage">
-      文章生成には <?= openai_model ?> 、画像生成にはDALL-E 3を利用しています。
+      文章生成： <?= openai_model ?> 、画像生成：DALL-E 3
     </div>
 <script>
   // ボタンを無効化する関数
@@ -213,6 +220,7 @@ select {
   function generateText() {
     var deepDive = document.getElementById('deepDive').value;
     var creativity = document.getElementById('creativity').value;
+    var profileDocUrl = document.getElementById('profileDocUrl').value;
 
     disableButtons(); // ボタンを無効にする
 
@@ -227,9 +235,29 @@ select {
         alert('再度実行してください：' + e);
         document.getElementById('waitingMessage').style.display = 'none';
       })
-      .generateTextInCurrentElement(deepDive, creativity);
+      .generateTextInCurrentElement(deepDive, creativity, profileDocUrl);
   }
 
+  function generateMarkdownSlides() {
+    var markdown = document.getElementById('markdownInput').value;
+    if (!markdown.trim()) {
+      alert("マークダウンの入力がありません。");
+      return;
+    }
+    disableButtons();
+    document.getElementById('waitingMessage').style.display = 'block';
+    google.script.run
+      .withSuccessHandler(function() {
+        enableButtons();
+        document.getElementById('waitingMessage').style.display = 'none';
+      })
+      .withFailureHandler(function(e) {
+        enableButtons();
+        alert('再度実行してください：' + e);
+        document.getElementById('waitingMessage').style.display = 'none';
+      })
+      .createSlidesFromMarkdown(markdown);
+  }
 </script>
 
 

@@ -12,7 +12,7 @@ function onOpen() {
 }
 
 function showSidebar() {
-  const ver = "(ver:2)";
+  const ver = "(ver:2.1)";
   const html = HtmlService.createTemplateFromFile('sidebar.html')
   html.openai_model = OPENAI_MODEL;
   SlidesApp.getUi().showSidebar(html.evaluate().setTitle('GPTスライド'  + ver).setWidth(300));
@@ -138,7 +138,17 @@ function generateImageInSlide_(slide, imageCaption) {
  * テーブルの場合、各セルのテキストを取得し、新しいテキストを生成して置き換えます。
  * 選択された要素がテキストを含む形状またはテーブルでない場合、エラーをスローします。
  */
-function generateTextInCurrentElement(deepDive, creativity) {
+function generateTextInCurrentElement(deepDive, creativity, profileDocUrl) {
+  let prompt = "";
+  if (profileDocUrl) {
+    try {
+      doc = DocumentApp.openByUrl(profileDocUrl);
+      prompt += `---------------------\nこのスライドの付加情報は以下の通りです。\n---------------------\n\n${doc.getText()}`;
+    } catch {
+      console.log(`${profileDocUrl}は無効なURLです。`);
+    }
+  }
+
   const selection = SlidesApp.getActivePresentation().getSelection();
   if (!selection || !selection.getPageElementRange()) {
     throw "テキストが含まれるオブジェクトをアクティブにしてください。";
@@ -150,7 +160,7 @@ function generateTextInCurrentElement(deepDive, creativity) {
       const shape = element.asShape();
       const textRange = shape.getText();
       const currentText = textRange.asString();
-      const content = getTextResponse_(deepDive + "\n" +currentText, creativity);
+      const content = getTextResponse_(deepDive + "\n" +currentText + prompt, creativity);
       const newText = `${content}`;
       textRange.setText(newText);
     } else if (element.getPageElementType() === SlidesApp.PageElementType.TABLE) {
